@@ -86,14 +86,8 @@ if start_listening:
             st.text("Chatbot Response: " + response)
             
             # Convert the chatbot's response back to speech audio
-            tts = gTTS(text=response, lang='en')
-            buffer = io.BytesIO()
-            tts.write_to_fp(buffer)
-            buffer.seek(0)
-            pygame.mixer.init()
-            pygame.mixer.music.load(buffer)
-            pygame.mixer.music.play()
-            
+            text_to_speech(response, recognizer, microphone, language='en', stop=True)
+      
             # Append the user's voice command and chatbot response to the conversation
             st.session_state.requests.append(text_input)
             st.session_state.responses.append(response)
