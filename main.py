@@ -28,7 +28,7 @@ system_msg_template = SystemMessagePromptTemplate.from_template(template="""You 
   "I don't know'.
   If the answer is found
   show the answer,
-  Below the answer show citations name from context """)
+  Below the answer show citations of the company mentioned in Citations section""")
 
 
 human_msg_template = HumanMessagePromptTemplate.from_template(template="{input}")
@@ -52,7 +52,7 @@ with textcontainer:
             # st.subheader("Refined Query:")
             # st.write(refined_query)
             context = find_match(refined_query)
-            # print(context)  
+            print(context)  
             response = conversation.predict(input=f"Context:\n {context} \n\n Query:\n{query}")
         st.session_state.requests.append(query)
         st.session_state.responses.append(response) 
