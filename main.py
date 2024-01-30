@@ -27,10 +27,8 @@ system_msg_template = SystemMessagePromptTemplate.from_template(template="""You 
   If the answer cannot be found  in the information provided by the user, you truthfully say:
   "I don't know'.
   If the answer is found
-  show the answer then,
-  show on a separate line encased in curly brackets with a key pair value company: and source:
-  where company is the name of the stock in question
-  and source is the name of report the answer is based on""")
+  show the answer,
+  Below the answer show citations name from context """)
 
 
 human_msg_template = HumanMessagePromptTemplate.from_template(template="{input}")
@@ -51,8 +49,8 @@ with textcontainer:
             conversation_string = get_conversation_string()
             # st.code(conversation_string)
             refined_query = query_refiner(conversation_string, query)
-            st.subheader("Refined Query:")
-            st.write(refined_query)
+            # st.subheader("Refined Query:")
+            # st.write(refined_query)
             context = find_match(refined_query)
             # print(context)  
             response = conversation.predict(input=f"Context:\n {context} \n\n Query:\n{query}")
