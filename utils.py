@@ -107,6 +107,7 @@ def text_to_speech(text, recognizer, microphone, language='en', stop=False):
     buffer = io.BytesIO()
     tts.write_to_fp(buffer)
     buffer.seek(0)
+    print(buffer)
     pygame.mixer.init()
     pygame.mixer.music.load(buffer)
     pygame.mixer.music.play()
