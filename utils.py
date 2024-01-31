@@ -5,6 +5,11 @@ from dotenv import load_dotenv
 import textwrap
 import os
 import json
+import speech_recognition as sr
+import pyaudio
+from gtts import gTTS
+import io
+import pygame
 
 load_dotenv()
 with open("config.json", 'r') as json_file:
@@ -16,7 +21,7 @@ pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"), environment=os.getenv("PINE
 index = pc.Index(os.getenv('PINECONE_INDEX'))
 
 def query_refiner(conversation, query):
-    temperature_ = 0.7
+    temperature_ = 0.9
 
     completion = client.chat.completions.create(
         model = "gpt-3.5-turbo",
@@ -42,12 +47,16 @@ def get_embedding(text, model= "text-embedding-ada-002"):
 
 def find_match(input_):
     query_embedding = get_embedding(input_, model='text-embedding-ada-002')
-    # input_em = model.encode(input).tolist()
-    result = index.query(vector=query_embedding, top_k=2, includeMetadata=True)
-    citations = "Citations: "+cites[result['matches'][0]['metadata']['citation']]+ \
-                                "\n"+ cites[result['matches'][1]['metadata']['citation']]
-    return result['matches'][0]['metadata']['text']+"\n"+ \
-            result['matches'][1]['metadata']['text']+"\n"+citations
+    k = 4
+    result = index.query(vector=query_embedding, top_k=k, includeMetadata=True)
+    citations = "Citations: "
+    cite = ''
+    res = ''
+    for i in range (0,k):
+        res += result['matches'][i]['metadata']['text']+"\n"
+        cite += '\n'+cites[result['matches'][i]['metadata']['citation']]
+    citations = "Citations: "+cite
+    return res+citations
 
 def get_conversation_string():
     conversation_string = ""
