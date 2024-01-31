@@ -54,48 +54,38 @@ text_container = st.container()
 recognizer = sr.Recognizer()
 microphone = sr.Microphone()
 
-start_listening = st.button("Start Listening")
 
-if start_listening:
-    st.text("Listening for wake word...")
-    
-    # Listen for the wake word to initiate voice input
-    if listen_for_wake_word(recognizer, microphone):
-        st.text("Wake word detected. You can now speak your command.")
-        
-        # Listen for voice input
-        with microphone as source:
-            recognizer.adjust_for_ambient_noise(source)
-            audio_data = recognizer.listen(source)
-        
-        try:
-            # Convert voice input to text
-            text_input = recognizer.recognize_google(audio_data)
-            
-            # Print the recognized text
-            st.text("You said: " + text_input)
-            
-            # Use the recognized text as input for the chatbot
-            conversation_string = get_conversation_string()  # Replace with your conversation string
-            refined_query = query_refiner(conversation_string, text_input)  # Replace with your query refinement logic
-            print(refined_query)
-            context = find_match(refined_query)  # Replace with your context matching logic
-            response = conversation.predict(input=f"Context:\n {context} \n\n Query:\n{text_input}")
-            
-            # Print the chatbot's response
-            st.text("Chatbot Response: " + response)
-            
-            # Convert the chatbot's response back to speech audio
-            text_to_speech(response, recognizer, microphone, language='en', stop=True)
-      
-            # Append the user's voice command and chatbot response to the conversation
-            st.session_state.requests.append(text_input)
-            st.session_state.responses.append(response)
-            
-        except sr.UnknownValueError:
-            st.text("Sorry, could not understand audio.")
-        except sr.RequestError as e:
-            st.text(f"Could not request results from Google Speech Recognition service; {e}")
+def speech_to_text():
+    recognizer = sr.Recognizer()
+    microphone = sr.Microphone()
+
+    # Listen for the wake word before processing commands
+    listen_for_wake_word(recognizer, microphone)
+
+    # Now, listen for the actual command
+    with microphone as source:
+        # print("Listening for command...")
+        recognizer.adjust_for_ambient_noise(source)
+        audio_data = recognizer.listen(source)
+
+    try:
+        # print("Recognizing...")
+        text_input = recognizer.recognize_google(audio_data)
+        st.text("You said: " + text_input)
+        conversation_string = get_conversation_string()  # Replace with your conversation string
+        refined_query = query_refiner(conversation_string, text_input)  # Replace with your query refinement logic
+        print(refined_query)
+        context = find_match(refined_query)  # Replace with your context matching logic
+        response = conversation.predict(input=f"Context:\n {context} \n\n Query:\n{text_input}")
+        st.text("Chatbot Response: " + response)
+        text_to_speech(response,recognizer=recognizer,microphone=microphone,stop=True)
+        st.session_state.requests.append(text_input)
+        st.session_state.responses.append(response)
+
+    except sr.UnknownValueError:
+        print("Sorry, could not understand audio.")
+    except sr.RequestError as e:
+        print(f"Could not request results from Google Speech Recognition service; {e}")
 
 with response_container:
     if st.session_state['responses']:
@@ -103,3 +93,8 @@ with response_container:
             message(st.session_state['responses'][i], key=str(i))
             if i < len(st.session_state['requests']):
                 message(st.session_state["requests"][i], is_user=True, key=str(i) + '_user')
+
+
+if __name__ == "__main__":
+    while True:
+        speech_to_text()
