@@ -1,4 +1,5 @@
-from langchain.chat_models import ChatOpenAI
+# from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 from langchain.prompts import (
@@ -35,25 +36,29 @@ human_msg_template = HumanMessagePromptTemplate.from_template(template="{input}"
 
 prompt_template = ChatPromptTemplate.from_messages([system_msg_template, MessagesPlaceholder(variable_name="history"), human_msg_template])
 
-conversation = ConversationChain(memory=st.session_state.buffer_memory, prompt=prompt_template, llm=llm, verbose=True)
+conversation = ConversationChain(memory=st.session_state.buffer_memory, prompt=prompt_template, llm=llm)
 
 st.title("Fundamental Analysis Bot")
 
 response_container = st.container()
 textcontainer = st.container()
 
+
 with textcontainer:
-    query = st.text_input("Query: ", key="input")
+
+    query = st.text_input("Enter text query or click the microphone to speak", key="input")
+
+    if st.button("🎙️ Speak"):
+        query = speech_to_text()  
+        
+  
     if query:
         with st.spinner("typing..."):
             conversation_string = get_conversation_string()
-            # st.code(conversation_string)
             refined_query = query_refiner(conversation_string, query)
-            # st.subheader("Refined Query:")
-            # st.write(refined_query)
-            context = find_match(refined_query)
-            print(context)  
+            context = find_match(refined_query) 
             response = conversation.predict(input=f"Context:\n {context} \n\n Query:\n{query}")
+            text_to_speech(response)
         st.session_state.requests.append(query)
         st.session_state.responses.append(response) 
         
