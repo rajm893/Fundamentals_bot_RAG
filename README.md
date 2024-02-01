@@ -10,4 +10,4 @@
 - Used Speech Recognition library that uses Google Speech API to convert speech to text and gTTS library that uses Google Translate's text-to-speech API.
 - Also deployed main branch code to streamlit cloud.
 
-![Alt text](chat_UI.png)
+![Alt text](chat_ui.png)
